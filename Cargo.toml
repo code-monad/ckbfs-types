@@ -2,6 +2,8 @@
 name = "ckbfs-types"
 version = "0.1.0"
 edition = "2021"
+description = "CKBFS types molecule encode/decode utils and native mapping"
+license = "MIT"
 
 [dependencies]
 molecule = { version = "0.7.5", default-features = false }
