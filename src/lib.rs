@@ -25,6 +25,16 @@ pub struct BackLinkNative {
     pub tx_hash: [u8; 32],
 }
 
+impl Into<Indexes> for Vec<u32> {
+    fn into(self) -> Indexes {
+        Indexes::new_builder()
+            .extend(self.iter().map(|x| {
+                Uint32::new_unchecked(molecule::bytes::Bytes::from(x.to_le_bytes().to_vec()))
+            }))
+            .build()
+    }
+}
+
 impl Into<BackLinkNative> for BackLink {
     fn into(self) -> BackLinkNative {
         let indexes = self
