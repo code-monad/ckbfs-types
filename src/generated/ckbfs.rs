@@ -1187,6 +1187,278 @@ impl molecule::prelude::Builder for Uint32OptBuilder {
     }
 }
 #[derive(Clone)]
+pub struct Indexes(molecule::bytes::Bytes);
+impl ::core::fmt::LowerHex for Indexes {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+        use molecule::hex_string;
+        if f.alternate() {
+            write!(f, "0x")?;
+        }
+        write!(f, "{}", hex_string(self.as_slice()))
+    }
+}
+impl ::core::fmt::Debug for Indexes {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+        write!(f, "{}({:#x})", Self::NAME, self)
+    }
+}
+impl ::core::fmt::Display for Indexes {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+        write!(f, "{} [", Self::NAME)?;
+        for i in 0..self.len() {
+            if i == 0 {
+                write!(f, "{}", self.get_unchecked(i))?;
+            } else {
+                write!(f, ", {}", self.get_unchecked(i))?;
+            }
+        }
+        write!(f, "]")
+    }
+}
+impl ::core::default::Default for Indexes {
+    fn default() -> Self {
+        let v = molecule::bytes::Bytes::from_static(&Self::DEFAULT_VALUE);
+        Indexes::new_unchecked(v)
+    }
+}
+impl Indexes {
+    const DEFAULT_VALUE: [u8; 4] = [0, 0, 0, 0];
+    pub const ITEM_SIZE: usize = 4;
+    pub fn total_size(&self) -> usize {
+        molecule::NUMBER_SIZE + Self::ITEM_SIZE * self.item_count()
+    }
+    pub fn item_count(&self) -> usize {
+        molecule::unpack_number(self.as_slice()) as usize
+    }
+    pub fn len(&self) -> usize {
+        self.item_count()
+    }
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+    pub fn get(&self, idx: usize) -> Option<Uint32> {
+        if idx >= self.len() {
+            None
+        } else {
+            Some(self.get_unchecked(idx))
+        }
+    }
+    pub fn get_unchecked(&self, idx: usize) -> Uint32 {
+        let start = molecule::NUMBER_SIZE + Self::ITEM_SIZE * idx;
+        let end = start + Self::ITEM_SIZE;
+        Uint32::new_unchecked(self.0.slice(start..end))
+    }
+    pub fn as_reader<'r>(&'r self) -> IndexesReader<'r> {
+        IndexesReader::new_unchecked(self.as_slice())
+    }
+}
+impl molecule::prelude::Entity for Indexes {
+    type Builder = IndexesBuilder;
+    const NAME: &'static str = "Indexes";
+    fn new_unchecked(data: molecule::bytes::Bytes) -> Self {
+        Indexes(data)
+    }
+    fn as_bytes(&self) -> molecule::bytes::Bytes {
+        self.0.clone()
+    }
+    fn as_slice(&self) -> &[u8] {
+        &self.0[..]
+    }
+    fn from_slice(slice: &[u8]) -> molecule::error::VerificationResult<Self> {
+        IndexesReader::from_slice(slice).map(|reader| reader.to_entity())
+    }
+    fn from_compatible_slice(slice: &[u8]) -> molecule::error::VerificationResult<Self> {
+        IndexesReader::from_compatible_slice(slice).map(|reader| reader.to_entity())
+    }
+    fn new_builder() -> Self::Builder {
+        ::core::default::Default::default()
+    }
+    fn as_builder(self) -> Self::Builder {
+        Self::new_builder().extend(self.into_iter())
+    }
+}
+#[derive(Clone, Copy)]
+pub struct IndexesReader<'r>(&'r [u8]);
+impl<'r> ::core::fmt::LowerHex for IndexesReader<'r> {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+        use molecule::hex_string;
+        if f.alternate() {
+            write!(f, "0x")?;
+        }
+        write!(f, "{}", hex_string(self.as_slice()))
+    }
+}
+impl<'r> ::core::fmt::Debug for IndexesReader<'r> {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+        write!(f, "{}({:#x})", Self::NAME, self)
+    }
+}
+impl<'r> ::core::fmt::Display for IndexesReader<'r> {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+        write!(f, "{} [", Self::NAME)?;
+        for i in 0..self.len() {
+            if i == 0 {
+                write!(f, "{}", self.get_unchecked(i))?;
+            } else {
+                write!(f, ", {}", self.get_unchecked(i))?;
+            }
+        }
+        write!(f, "]")
+    }
+}
+impl<'r> IndexesReader<'r> {
+    pub const ITEM_SIZE: usize = 4;
+    pub fn total_size(&self) -> usize {
+        molecule::NUMBER_SIZE + Self::ITEM_SIZE * self.item_count()
+    }
+    pub fn item_count(&self) -> usize {
+        molecule::unpack_number(self.as_slice()) as usize
+    }
+    pub fn len(&self) -> usize {
+        self.item_count()
+    }
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+    pub fn get(&self, idx: usize) -> Option<Uint32Reader<'r>> {
+        if idx >= self.len() {
+            None
+        } else {
+            Some(self.get_unchecked(idx))
+        }
+    }
+    pub fn get_unchecked(&self, idx: usize) -> Uint32Reader<'r> {
+        let start = molecule::NUMBER_SIZE + Self::ITEM_SIZE * idx;
+        let end = start + Self::ITEM_SIZE;
+        Uint32Reader::new_unchecked(&self.as_slice()[start..end])
+    }
+}
+impl<'r> molecule::prelude::Reader<'r> for IndexesReader<'r> {
+    type Entity = Indexes;
+    const NAME: &'static str = "IndexesReader";
+    fn to_entity(&self) -> Self::Entity {
+        Self::Entity::new_unchecked(self.as_slice().to_owned().into())
+    }
+    fn new_unchecked(slice: &'r [u8]) -> Self {
+        IndexesReader(slice)
+    }
+    fn as_slice(&self) -> &'r [u8] {
+        self.0
+    }
+    fn verify(slice: &[u8], _compatible: bool) -> molecule::error::VerificationResult<()> {
+        use molecule::verification_error as ve;
+        let slice_len = slice.len();
+        if slice_len < molecule::NUMBER_SIZE {
+            return ve!(Self, HeaderIsBroken, molecule::NUMBER_SIZE, slice_len);
+        }
+        let item_count = molecule::unpack_number(slice) as usize;
+        if item_count == 0 {
+            if slice_len != molecule::NUMBER_SIZE {
+                return ve!(Self, TotalSizeNotMatch, molecule::NUMBER_SIZE, slice_len);
+            }
+            return Ok(());
+        }
+        let total_size = molecule::NUMBER_SIZE + Self::ITEM_SIZE * item_count;
+        if slice_len != total_size {
+            return ve!(Self, TotalSizeNotMatch, total_size, slice_len);
+        }
+        Ok(())
+    }
+}
+#[derive(Debug, Default)]
+pub struct IndexesBuilder(pub(crate) Vec<Uint32>);
+impl IndexesBuilder {
+    pub const ITEM_SIZE: usize = 4;
+    pub fn set(mut self, v: Vec<Uint32>) -> Self {
+        self.0 = v;
+        self
+    }
+    pub fn push(mut self, v: Uint32) -> Self {
+        self.0.push(v);
+        self
+    }
+    pub fn extend<T: ::core::iter::IntoIterator<Item = Uint32>>(mut self, iter: T) -> Self {
+        for elem in iter {
+            self.0.push(elem);
+        }
+        self
+    }
+    pub fn replace(&mut self, index: usize, v: Uint32) -> Option<Uint32> {
+        self.0
+            .get_mut(index)
+            .map(|item| ::core::mem::replace(item, v))
+    }
+}
+impl molecule::prelude::Builder for IndexesBuilder {
+    type Entity = Indexes;
+    const NAME: &'static str = "IndexesBuilder";
+    fn expected_length(&self) -> usize {
+        molecule::NUMBER_SIZE + Self::ITEM_SIZE * self.0.len()
+    }
+    fn write<W: molecule::io::Write>(&self, writer: &mut W) -> molecule::io::Result<()> {
+        writer.write_all(&molecule::pack_number(self.0.len() as molecule::Number))?;
+        for inner in &self.0[..] {
+            writer.write_all(inner.as_slice())?;
+        }
+        Ok(())
+    }
+    fn build(&self) -> Self::Entity {
+        let mut inner = Vec::with_capacity(self.expected_length());
+        self.write(&mut inner)
+            .unwrap_or_else(|_| panic!("{} build should be ok", Self::NAME));
+        Indexes::new_unchecked(inner.into())
+    }
+}
+pub struct IndexesIterator(Indexes, usize, usize);
+impl ::core::iter::Iterator for IndexesIterator {
+    type Item = Uint32;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.1 >= self.2 {
+            None
+        } else {
+            let ret = self.0.get_unchecked(self.1);
+            self.1 += 1;
+            Some(ret)
+        }
+    }
+}
+impl ::core::iter::ExactSizeIterator for IndexesIterator {
+    fn len(&self) -> usize {
+        self.2 - self.1
+    }
+}
+impl ::core::iter::IntoIterator for Indexes {
+    type Item = Uint32;
+    type IntoIter = IndexesIterator;
+    fn into_iter(self) -> Self::IntoIter {
+        let len = self.len();
+        IndexesIterator(self, 0, len)
+    }
+}
+impl<'r> IndexesReader<'r> {
+    pub fn iter<'t>(&'t self) -> IndexesReaderIterator<'t, 'r> {
+        IndexesReaderIterator(&self, 0, self.len())
+    }
+}
+pub struct IndexesReaderIterator<'t, 'r>(&'t IndexesReader<'r>, usize, usize);
+impl<'t: 'r, 'r> ::core::iter::Iterator for IndexesReaderIterator<'t, 'r> {
+    type Item = Uint32Reader<'t>;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.1 >= self.2 {
+            None
+        } else {
+            let ret = self.0.get_unchecked(self.1);
+            self.1 += 1;
+            Some(ret)
+        }
+    }
+}
+impl<'t: 'r, 'r> ::core::iter::ExactSizeIterator for IndexesReaderIterator<'t, 'r> {
+    fn len(&self) -> usize {
+        self.2 - self.1
+    }
+}
+#[derive(Clone)]
 pub struct CKBFSData(molecule::bytes::Bytes);
 impl ::core::fmt::LowerHex for CKBFSData {
     fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
@@ -1205,7 +1477,7 @@ impl ::core::fmt::Debug for CKBFSData {
 impl ::core::fmt::Display for CKBFSData {
     fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
         write!(f, "{} {{ ", Self::NAME)?;
-        write!(f, "{}: {}", "index", self.index())?;
+        write!(f, "{}: {}", "indexes", self.indexes())?;
         write!(f, ", {}: {}", "checksum", self.checksum())?;
         write!(f, ", {}: {}", "content_type", self.content_type())?;
         write!(f, ", {}: {}", "filename", self.filename())?;
@@ -1224,9 +1496,9 @@ impl ::core::default::Default for CKBFSData {
     }
 }
 impl CKBFSData {
-    const DEFAULT_VALUE: [u8; 40] = [
-        40, 0, 0, 0, 24, 0, 0, 0, 24, 0, 0, 0, 28, 0, 0, 0, 32, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0,
+    const DEFAULT_VALUE: [u8; 44] = [
+        44, 0, 0, 0, 24, 0, 0, 0, 28, 0, 0, 0, 32, 0, 0, 0, 36, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0,
     ];
     pub const FIELD_COUNT: usize = 5;
     pub fn total_size(&self) -> usize {
@@ -1245,11 +1517,11 @@ impl CKBFSData {
     pub fn has_extra_fields(&self) -> bool {
         Self::FIELD_COUNT != self.field_count()
     }
-    pub fn index(&self) -> Uint32Opt {
+    pub fn indexes(&self) -> Indexes {
         let slice = self.as_slice();
         let start = molecule::unpack_number(&slice[4..]) as usize;
         let end = molecule::unpack_number(&slice[8..]) as usize;
-        Uint32Opt::new_unchecked(self.0.slice(start..end))
+        Indexes::new_unchecked(self.0.slice(start..end))
     }
     pub fn checksum(&self) -> Uint32 {
         let slice = self.as_slice();
@@ -1306,7 +1578,7 @@ impl molecule::prelude::Entity for CKBFSData {
     }
     fn as_builder(self) -> Self::Builder {
         Self::new_builder()
-            .index(self.index())
+            .indexes(self.indexes())
             .checksum(self.checksum())
             .content_type(self.content_type())
             .filename(self.filename())
@@ -1332,7 +1604,7 @@ impl<'r> ::core::fmt::Debug for CKBFSDataReader<'r> {
 impl<'r> ::core::fmt::Display for CKBFSDataReader<'r> {
     fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
         write!(f, "{} {{ ", Self::NAME)?;
-        write!(f, "{}: {}", "index", self.index())?;
+        write!(f, "{}: {}", "indexes", self.indexes())?;
         write!(f, ", {}: {}", "checksum", self.checksum())?;
         write!(f, ", {}: {}", "content_type", self.content_type())?;
         write!(f, ", {}: {}", "filename", self.filename())?;
@@ -1362,11 +1634,11 @@ impl<'r> CKBFSDataReader<'r> {
     pub fn has_extra_fields(&self) -> bool {
         Self::FIELD_COUNT != self.field_count()
     }
-    pub fn index(&self) -> Uint32OptReader<'r> {
+    pub fn indexes(&self) -> IndexesReader<'r> {
         let slice = self.as_slice();
         let start = molecule::unpack_number(&slice[4..]) as usize;
         let end = molecule::unpack_number(&slice[8..]) as usize;
-        Uint32OptReader::new_unchecked(&self.as_slice()[start..end])
+        IndexesReader::new_unchecked(&self.as_slice()[start..end])
     }
     pub fn checksum(&self) -> Uint32Reader<'r> {
         let slice = self.as_slice();
@@ -1443,7 +1715,7 @@ impl<'r> molecule::prelude::Reader<'r> for CKBFSDataReader<'r> {
         if offsets.windows(2).any(|i| i[0] > i[1]) {
             return ve!(Self, OffsetsNotMatch);
         }
-        Uint32OptReader::verify(&slice[offsets[0]..offsets[1]], compatible)?;
+        IndexesReader::verify(&slice[offsets[0]..offsets[1]], compatible)?;
         Uint32Reader::verify(&slice[offsets[1]..offsets[2]], compatible)?;
         BytesReader::verify(&slice[offsets[2]..offsets[3]], compatible)?;
         BytesReader::verify(&slice[offsets[3]..offsets[4]], compatible)?;
@@ -1453,7 +1725,7 @@ impl<'r> molecule::prelude::Reader<'r> for CKBFSDataReader<'r> {
 }
 #[derive(Debug, Default)]
 pub struct CKBFSDataBuilder {
-    pub(crate) index: Uint32Opt,
+    pub(crate) indexes: Indexes,
     pub(crate) checksum: Uint32,
     pub(crate) content_type: Bytes,
     pub(crate) filename: Bytes,
@@ -1461,8 +1733,8 @@ pub struct CKBFSDataBuilder {
 }
 impl CKBFSDataBuilder {
     pub const FIELD_COUNT: usize = 5;
-    pub fn index(mut self, v: Uint32Opt) -> Self {
-        self.index = v;
+    pub fn indexes(mut self, v: Indexes) -> Self {
+        self.indexes = v;
         self
     }
     pub fn checksum(mut self, v: Uint32) -> Self {
@@ -1487,7 +1759,7 @@ impl molecule::prelude::Builder for CKBFSDataBuilder {
     const NAME: &'static str = "CKBFSDataBuilder";
     fn expected_length(&self) -> usize {
         molecule::NUMBER_SIZE * (Self::FIELD_COUNT + 1)
-            + self.index.as_slice().len()
+            + self.indexes.as_slice().len()
             + self.checksum.as_slice().len()
             + self.content_type.as_slice().len()
             + self.filename.as_slice().len()
@@ -1497,7 +1769,7 @@ impl molecule::prelude::Builder for CKBFSDataBuilder {
         let mut total_size = molecule::NUMBER_SIZE * (Self::FIELD_COUNT + 1);
         let mut offsets = Vec::with_capacity(Self::FIELD_COUNT);
         offsets.push(total_size);
-        total_size += self.index.as_slice().len();
+        total_size += self.indexes.as_slice().len();
         offsets.push(total_size);
         total_size += self.checksum.as_slice().len();
         offsets.push(total_size);
@@ -1510,7 +1782,7 @@ impl molecule::prelude::Builder for CKBFSDataBuilder {
         for offset in offsets.into_iter() {
             writer.write_all(&molecule::pack_number(offset as molecule::Number))?;
         }
-        writer.write_all(self.index.as_slice())?;
+        writer.write_all(self.indexes.as_slice())?;
         writer.write_all(self.checksum.as_slice())?;
         writer.write_all(self.content_type.as_slice())?;
         writer.write_all(self.filename.as_slice())?;
@@ -1543,7 +1815,7 @@ impl ::core::fmt::Debug for BackLink {
 impl ::core::fmt::Display for BackLink {
     fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
         write!(f, "{} {{ ", Self::NAME)?;
-        write!(f, "{}: {}", "index", self.index())?;
+        write!(f, "{}: {}", "indexes", self.indexes())?;
         write!(f, ", {}: {}", "checksum", self.checksum())?;
         write!(f, ", {}: {}", "tx_hash", self.tx_hash())?;
         let extra_count = self.count_extra_fields();
@@ -1581,11 +1853,11 @@ impl BackLink {
     pub fn has_extra_fields(&self) -> bool {
         Self::FIELD_COUNT != self.field_count()
     }
-    pub fn index(&self) -> Uint32 {
+    pub fn indexes(&self) -> Indexes {
         let slice = self.as_slice();
         let start = molecule::unpack_number(&slice[4..]) as usize;
         let end = molecule::unpack_number(&slice[8..]) as usize;
-        Uint32::new_unchecked(self.0.slice(start..end))
+        Indexes::new_unchecked(self.0.slice(start..end))
     }
     pub fn checksum(&self) -> Uint32 {
         let slice = self.as_slice();
@@ -1630,7 +1902,7 @@ impl molecule::prelude::Entity for BackLink {
     }
     fn as_builder(self) -> Self::Builder {
         Self::new_builder()
-            .index(self.index())
+            .indexes(self.indexes())
             .checksum(self.checksum())
             .tx_hash(self.tx_hash())
     }
@@ -1654,7 +1926,7 @@ impl<'r> ::core::fmt::Debug for BackLinkReader<'r> {
 impl<'r> ::core::fmt::Display for BackLinkReader<'r> {
     fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
         write!(f, "{} {{ ", Self::NAME)?;
-        write!(f, "{}: {}", "index", self.index())?;
+        write!(f, "{}: {}", "indexes", self.indexes())?;
         write!(f, ", {}: {}", "checksum", self.checksum())?;
         write!(f, ", {}: {}", "tx_hash", self.tx_hash())?;
         let extra_count = self.count_extra_fields();
@@ -1682,11 +1954,11 @@ impl<'r> BackLinkReader<'r> {
     pub fn has_extra_fields(&self) -> bool {
         Self::FIELD_COUNT != self.field_count()
     }
-    pub fn index(&self) -> Uint32Reader<'r> {
+    pub fn indexes(&self) -> IndexesReader<'r> {
         let slice = self.as_slice();
         let start = molecule::unpack_number(&slice[4..]) as usize;
         let end = molecule::unpack_number(&slice[8..]) as usize;
-        Uint32Reader::new_unchecked(&self.as_slice()[start..end])
+        IndexesReader::new_unchecked(&self.as_slice()[start..end])
     }
     pub fn checksum(&self) -> Uint32Reader<'r> {
         let slice = self.as_slice();
@@ -1751,7 +2023,7 @@ impl<'r> molecule::prelude::Reader<'r> for BackLinkReader<'r> {
         if offsets.windows(2).any(|i| i[0] > i[1]) {
             return ve!(Self, OffsetsNotMatch);
         }
-        Uint32Reader::verify(&slice[offsets[0]..offsets[1]], compatible)?;
+        IndexesReader::verify(&slice[offsets[0]..offsets[1]], compatible)?;
         Uint32Reader::verify(&slice[offsets[1]..offsets[2]], compatible)?;
         Byte32Reader::verify(&slice[offsets[2]..offsets[3]], compatible)?;
         Ok(())
@@ -1759,14 +2031,14 @@ impl<'r> molecule::prelude::Reader<'r> for BackLinkReader<'r> {
 }
 #[derive(Debug, Default)]
 pub struct BackLinkBuilder {
-    pub(crate) index: Uint32,
+    pub(crate) indexes: Indexes,
     pub(crate) checksum: Uint32,
     pub(crate) tx_hash: Byte32,
 }
 impl BackLinkBuilder {
     pub const FIELD_COUNT: usize = 3;
-    pub fn index(mut self, v: Uint32) -> Self {
-        self.index = v;
+    pub fn indexes(mut self, v: Indexes) -> Self {
+        self.indexes = v;
         self
     }
     pub fn checksum(mut self, v: Uint32) -> Self {
@@ -1783,7 +2055,7 @@ impl molecule::prelude::Builder for BackLinkBuilder {
     const NAME: &'static str = "BackLinkBuilder";
     fn expected_length(&self) -> usize {
         molecule::NUMBER_SIZE * (Self::FIELD_COUNT + 1)
-            + self.index.as_slice().len()
+            + self.indexes.as_slice().len()
             + self.checksum.as_slice().len()
             + self.tx_hash.as_slice().len()
     }
@@ -1791,7 +2063,7 @@ impl molecule::prelude::Builder for BackLinkBuilder {
         let mut total_size = molecule::NUMBER_SIZE * (Self::FIELD_COUNT + 1);
         let mut offsets = Vec::with_capacity(Self::FIELD_COUNT);
         offsets.push(total_size);
-        total_size += self.index.as_slice().len();
+        total_size += self.indexes.as_slice().len();
         offsets.push(total_size);
         total_size += self.checksum.as_slice().len();
         offsets.push(total_size);
@@ -1800,7 +2072,7 @@ impl molecule::prelude::Builder for BackLinkBuilder {
         for offset in offsets.into_iter() {
             writer.write_all(&molecule::pack_number(offset as molecule::Number))?;
         }
-        writer.write_all(self.index.as_slice())?;
+        writer.write_all(self.indexes.as_slice())?;
         writer.write_all(self.checksum.as_slice())?;
         writer.write_all(self.tx_hash.as_slice())?;
         Ok(())

@@ -2,9 +2,10 @@ array Uint32 [byte; 4];
 array Byte32 [byte; 32];
 vector Bytes <byte>;
 option Uint32Opt (Uint32);
+vector Indexes <Uint32>;
 
 table CKBFSData {
-  index: Uint32Opt,
+  indexes: Indexes,
   checksum: Uint32,
   content_type: Bytes,
   filename: Bytes,
@@ -12,7 +13,7 @@ table CKBFSData {
 }
 
 table BackLink {
-  index: Uint32,
+  indexes: Indexes,
   checksum: Uint32,
   tx_hash: Byte32,
 }
