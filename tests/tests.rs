@@ -3,7 +3,7 @@ use molecule::prelude::Entity;
 #[test]
 fn test_ckbfs_hex() {
     let data = CKBFSDataNative {
-        indexes: 1,
+        index: 1,
         checksum: 3839560431,
         content_type: String::from("plain/text"),
         filename: String::from("hello_ckbfs.txt"),
