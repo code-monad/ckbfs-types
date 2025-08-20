@@ -3,7 +3,7 @@ extern crate alloc;
 pub use crate::generated::ckbfs::{Bytes, CKBFSData};
 use alloc::{string::String, vec::Vec};
 
-use generated::ckbfs::{Byte32, Index, Uint32};
+use generated::ckbfs::{Byte32, Uint32};
 use molecule::prelude::{Builder, Entity};
 
 pub mod generated;
