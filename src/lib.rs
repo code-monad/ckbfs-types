@@ -36,7 +36,7 @@ impl From<CKBFSDataNative> for CKBFSData {
             data.index.to_le_bytes().to_vec(),
         ));
         CKBFSData::new_builder()
-            .index(Uint32::new_builder().set(index).build())
+            .index(index)
             .checksum(Uint32::new_unchecked(molecule::bytes::Bytes::from(
                 data.checksum.to_le_bytes().to_vec(),
             )))
